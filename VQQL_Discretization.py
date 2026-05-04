@@ -27,7 +27,7 @@ import joblib
 AGENT_CSV = "training_data.csv"
 
 # Output file where the vector quantizer will be stored
-OUTPUT_FILE = "lunarlander_vq.pkl"
+OUTPUT_FILE = "lunarlander_vq_256.pkl"
 
 # Columns that represent the STATE of the environment
 # IMPORTANT: Do NOT include the action column here
@@ -47,7 +47,7 @@ N_CLUSTERS = 256
 
 # Number of samples to use from each dataset
 # (keyboard and agent)
-SAMPLES_PER_SOURCE = 25000
+SAMPLES_PER_SOURCE = 15000
 
 
 # ==========================================

@@ -17,6 +17,7 @@ Modes:
 """
 
 import gymnasium as gym
+import pandas as pd
 import time
 import pygame
 import joblib
@@ -34,11 +35,11 @@ import os
 GRAVITY = -1.62
 
 ENV_NAME = "LunarLander-v3"
-QUANTIZER_FILE = "lunarlander_vq.pkl"
+QUANTIZER_FILE = "lunarlander_vq_32.pkl"
 QTABLE_FILE = "qtable_highest.txt"
 
 # MODE can be: "TRAIN", "PLAY"
-MODE = "PLAY"
+MODE = "TRAIN"
 
 # State representation mode:
 # "VQQL" -> use the quantizer
@@ -604,6 +605,7 @@ def main():
         for episode in range(EPISODES):
             observation, info = env.reset()
             game = GameState(observation)
+            log_rows = []
 
             terminated = False
             truncated = False
@@ -649,6 +651,11 @@ def main():
                 # Update current game state
                 game.update(observation, total_reward)
 
+                log_rows.append([
+                    game.x_position, game.y_position, game.x_velocity, game.y_velocity,
+                    game.angle, game.angular_velocity, game.left_leg_contact, game.right_leg_contact
+                ])
+
                 next_state_id = get_state_id(game, scaler, quantizer, state_columns)
 
                 # Bellman update using accumulated reward
@@ -664,6 +671,19 @@ def main():
 
                 
                 rewards_current_episode += total_reward
+
+            #adding csv file to save info
+            df = pd.DataFrame(log_rows, columns=[
+                "x_position", "y_position", "x_velocity", "y_velocity", "angle", "angular_velocity", "left_leg", "right_leg"
+            ])
+
+            df.to_csv(
+                "training_data.csv",
+                mode="a",
+                header=not os.path.exists("training_data.csv"),
+                index=False
+            )
+
 
             # Epsilon decay
             epsilon = decay_epsilon(episode, MAX_EPSILON, MIN_EPSILON, DECAY_RATE)
