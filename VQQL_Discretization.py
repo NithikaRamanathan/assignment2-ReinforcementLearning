@@ -27,7 +27,7 @@ import joblib
 AGENT_CSV = "training_data.csv"
 
 # Output file where the vector quantizer will be stored
-OUTPUT_FILE = "lunarlander_vq_256.pkl"
+OUTPUT_FILE = "lunarlander_vq_32.pkl"
 
 # Columns that represent the STATE of the environment
 # IMPORTANT: Do NOT include the action column here
