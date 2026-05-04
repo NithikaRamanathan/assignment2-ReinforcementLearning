@@ -35,8 +35,8 @@ import os
 GRAVITY = -1.62
 
 ENV_NAME = "LunarLander-v3"
-QUANTIZER_FILE = "lunarlander_vq_256.pkl"
-QTABLE_FILE = "qtable_vq_256.txt"
+#QUANTIZER_FILE = "lunarlander_vq_256.pkl"
+QTABLE_FILE = "qtable_manual.txt"
 
 # MODE can be: "TRAIN", "PLAY"
 MODE = "PLAY"
@@ -44,7 +44,7 @@ MODE = "PLAY"
 # State representation mode:
 # "VQQL" -> use the quantizer
 # "MANUAL" -> use a hand-crafted discretization
-STATE_MODE = "VQQL"
+STATE_MODE = "MANUAL"
 
 # If True, use the custom reward from compute_reward()
 # If False, use the raw reward from Gymnasium
