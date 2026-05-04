@@ -35,10 +35,10 @@ GRAVITY = -1.62
 
 ENV_NAME = "LunarLander-v3"
 QUANTIZER_FILE = "lunarlander_vq.pkl"
-QTABLE_LR_2 = "qtable.txt"
+QTABLE_FILE = "qtable_highest.txt"
 
 # MODE can be: "TRAIN", "PLAY"
-MODE = "TRAIN"
+MODE = "PLAY"
 
 # State representation mode:
 # "VQQL" -> use the quantizer
@@ -50,12 +50,12 @@ STATE_MODE = "MANUAL"
 USE_CUSTOM_REWARD = True
 
 # If True, render the environment during training (very slow)
-RENDER_TRAINING = False
+RENDER_TRAINING = True
 
 # Training parameters
-EPISODES = 5000
+EPISODES = 15000
 LEARNING_RATE = 0.2
-DISCOUNT_RATE = 0.95
+DISCOUNT_RATE = 0.98
 
 # Exploration parameters
 MAX_EPSILON = 1.0
@@ -230,8 +230,8 @@ def manual_state_id(game):
     y_vel_edges = np.array([-0.5, 0.5])
     y_vel_bin = np.digitize(y_vel, y_vel_edges)
 
-    left_leg_bin = left_leg
-    right_leg_bin = right_leg
+    left_leg_bin = int(left_leg)
+    right_leg_bin = int(right_leg)
 
     # mixed radix encoding
 
@@ -246,7 +246,7 @@ def manual_state_id(game):
 
 
 
-    return state_id
+    return int(state_id)
 
 # ==========================================
 # PHASE 1 STEP 2 - NEW REWARD FUNCTION
@@ -299,16 +299,15 @@ def compute_reward(observation, raw_reward, terminated, truncated):
     """
 
     horizontal_penalization = -0.1 * abs(x_position)
-    y_velocity_penalization = -0.1 * abs(y_velocity)
     angle_penalization = -0.1 * abs(angle)
     leg_contact_reward = 0
     if left_leg and right_leg:
-        leg_contact_reward = 0.1
+        leg_contact_reward = 0.2
     
     speed = (x_velocity**2 + y_velocity**2)**0.5
     descent_penalization = -0.1 * speed
 
-    reward += horizontal_penalization + y_velocity_penalization + angle_penalization + leg_contact_reward + descent_penalization
+    reward += horizontal_penalization + angle_penalization + leg_contact_reward + descent_penalization
 
     return reward
    
@@ -647,9 +646,10 @@ def main():
                     if terminated or truncated:
                         break
 
-                # Next discrete state after the macro-action
-                next_game = GameState(observation)
-                next_state_id = get_state_id(next_game, scaler, quantizer, state_columns)
+                # Update current game state
+                game.update(observation, total_reward)
+
+                next_state_id = get_state_id(game, scaler, quantizer, state_columns)
 
                 # Bellman update using accumulated reward
                 update_qtable(
@@ -662,8 +662,7 @@ def main():
                     DISCOUNT_RATE
                 )
 
-                # Update current game state
-                game.update(observation, total_reward)
+                
                 rewards_current_episode += total_reward
 
             # Epsilon decay
